@@ -1,12 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
-app = Flask(__name__)
 import os
+from flask_cors import CORS # Added for CORS functionality
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'sadeco_secret_key_123'
+app.secret_key = 'sadeco_secret_key_2025' # Necesario para sesiones y flash messages
+# Permitir CORS para todas las rutas y orígenes (útil si hay frontend externo)
+CORS(app) # Initialize CORS with the app
+app.config['SECRET_KEY'] = 'sadeco_secret_key_123' # This line was already present, kept for consistency with the instruction's value
 
 # Configuración Base de Datos (PostgreSQL en Nube / SQLite en Local)
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///sadeco_workers.db')
