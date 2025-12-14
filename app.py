@@ -29,6 +29,11 @@ class Worker(db.Model):
     personal_days = db.Column(db.Integer, default=6)  # Asuntos propios (Moscosos)
     extra_hours = db.Column(db.Float, default=0.0)    # Horas acumuladas positivas
     
+    # Control de Bajas Médicas
+    is_sick = db.Column(db.Boolean, default=False)
+    sick_start = db.Column(db.DateTime, nullable=True)
+    total_sick_days = db.Column(db.Integer, default=0)
+    
     # Historial de Notas (Para apuntar "pidió el día tal por WhatsApp")
     logs = db.relationship('Log', backref='worker', lazy=True)
 
