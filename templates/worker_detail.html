@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Detalle {{ worker.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 5px;
+        }
+
+        .big-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            width: 100%;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .log-item {
+            background: white;
+            border-bottom: 1px solid #eee;
+            padding: 12px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header con botón atrás -->
+    <div class="bg-success text-white p-3 sticky-top shadow-sm d-flex align-items-center">
+        <a href="/" class="text-white text-decoration-none me-3" style="font-size: 1.2rem;">←</a>
+        <div class="flex-grow-1">
+            <h5 class="m-0 fw-bold">{{ worker.name }}</h5>
+            <small style="opacity: 0.9;">{{ worker.category }}</small>
+        </div>
+    </div>
+
+    <div class="container mt-3">
+
+        <!-- Mensajes de éxito -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="row g-2 mb-4">
+            <!-- Tarjeta Vacaciones -->
+            <div class="col-6">
+                <div class="stat-card border-bottom border-4 border-success">
+                    <div class="label">Vacaciones</div>
+                    <div class="big-number text-success">{{ worker.vacation_days }}</div>
+                    <small class="text-muted">días</small>
+                    <div class="d-grid gap-2 mt-2">
+                        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
+                            data-bs-target="#modalVac">Gest.</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Tarjeta Asuntos Propios -->
+            <div class="col-6">
+                <div class="stat-card border-bottom border-4 border-warning">
+                    <div class="label">A. Propios</div>
+                    <div class="big-number text-dark">{{ worker.personal_days }}</div>
+                    <small class="text-muted">días</small>
+                    <div class="d-grid gap-2 mt-2">
+                        <button class="btn btn-sm btn-outline-warning text-dark" data-bs-toggle="modal"
+                            data-bs-target="#modalAP">Gest.</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Horas -->
+        <div class="card mb-4 shadow-sm border-0">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold">Horas Acumuladas</h6>
+                    <small class="text-muted">Bolsa de horas extra</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="fs-4 fw-bold me-2">{{ worker.extra_hours }}h</span>
+                    <button class="btn btn-sm btn-light border" data-bs-toggle="modal"
+                        data-bs-target="#modalHours">±</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial -->
+        <h6 class="text-muted ms-2 mb-2 text-uppercase fw-bold" style="font-size: 0.8rem;">Últimos Movimientos</h6>
+        <div class="list-group shadow-sm rounded-3 mb-5 overflow-hidden">
+            {% for log in worker.logs|reverse %}
+            <div class="log-item">
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold text-dark">{{ log.action }}</span>
+                    <span class="text-muted" style="font-size: 0.85rem;">{{ log.date.strftime('%d/%m') }}</span>
+                </div>
+                <div class="text-muted small">
+                    {% if log.amount < 0 %}{{ log.amount }}{% else %}+{{ log.amount }}{% endif %} {% if 'Horas' in
+                        log.action %}h{% else %} días{% endif %} {% if log.notes %} - <i>{{ log.notes }}</i>{% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="p-3 text-center text-muted">Sin movimientos recientes</div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- MODAL VACACIONES -->
+    <div class="modal fade" id="modalVac" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Gestionar Vacaciones</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/update/{{ worker.id }}" method="POST">
+                    <input type="hidden" name="type" value="vacation">
+                    <div class="modal-body text-center">
+                        <p class="mb-4">¿Qué quieres hacer?</p>
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <input type="radio" class="btn-check" name="operation" id="v_sub" value="subtract" checked>
+                            <label class="btn btn-outline-success" for="v_sub">Consumir (Restar)</label>
+                            <input type="radio" class="btn-check" name="operation" id="v_add" value="add">
+                            <label class="btn btn-outline-secondary" for="v_add">Devolver (Sumar)</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Días</span>
+                            <input type="number" name="amount" class="form-control text-center" value="1" min="1">
+                        </div>
+                        <input type="text" name="note" class="form-control" placeholder="Nota (ej: Semana Santa)">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success w-100">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ASUNTOS PROPIOS -->
+    <div class="modal fade" id="modalAP" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">Gestionar Asuntos Propios</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/update/{{ worker.id }}" method="POST">
+                    <input type="hidden" name="type" value="personal">
+                    <div class="modal-body text-center">
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <input type="radio" class="btn-check" name="operation" id="ap_sub" value="subtract" checked>
+                            <label class="btn btn-outline-warning text-dark" for="ap_sub">Gastar</label>
+                            <input type="radio" class="btn-check" name="operation" id="ap_add" value="add">
+                            <label class="btn btn-outline-secondary" for="ap_add">Sumar</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Días</span>
+                            <input type="number" name="amount" class="form-control text-center" value="1" min="1">
+                        </div>
+                        <input type="text" name="note" class="form-control" placeholder="Motivo...">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning w-100">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HORAS -->
+    <div class="modal fade" id="modalHours" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Bolsa de Horas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/update/{{ worker.id }}" method="POST">
+                    <input type="hidden" name="type" value="hours">
+                    <div class="modal-body text-center">
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <input type="radio" class="btn-check" name="operation" id="h_add" value="add" checked>
+                            <label class="btn btn-outline-dark" for="h_add">Añadir (Ganadas)</label>
+                            <input type="radio" class="btn-check" name="operation" id="h_sub" value="subtract">
+                            <label class="btn btn-outline-secondary" for="h_sub">Restar (Gastadas)</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Horas</span>
+                            <input type="number" step="0.5" name="amount" class="form-control text-center" value="1.0">
+                        </div>
+                        <input type="text" name="note" class="form-control" placeholder="Detalle...">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-dark w-100">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
