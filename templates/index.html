@@ -185,7 +185,10 @@
             {{ worker.name }}
             {% if worker.is_sick %}🚑{% endif %}
           </h6>
-          <span class="cat-badge">{{ worker.category }}</span>
+          <div>
+            <span class="cat-badge bg-info text-dark me-1">{{ worker.years_worked }}a</span>
+            <span class="cat-badge">{{ worker.category|truncate(15) }}</span>
+          </div>
         </div>
 
         <div class="row g-1 text-center">
@@ -245,18 +248,27 @@
                   <label class="fw-bold">Nombre Completo</label>
                   <input type="text" name="name" class="form-control" placeholder="Ej: Manuel García" required>
                 </div>
-                <div class="mb-3">
-                  <label class="fw-bold">Categoría</label>
-                  <select name="category" class="form-select">
-                    {% for cat in categories %}
-                    <option value="{{ cat }}">{{ cat }}</option>
-                    {% endfor %}
-                  </select>
+
+                <div class="row mb-3">
+                  <div class="col-6">
+                    <label class="fw-bold">Antigüedad (Años)</label>
+                    <input type="number" name="years_worked" class="form-control" placeholder="0" value="0">
+                    <small class="text-muted" style="font-size:0.7rem">Calcula vacs. automát.</small>
+                  </div>
+                  <div class="col-6">
+                    <label class="fw-bold">Categoría</label>
+                    <select name="category" class="form-select">
+                      {% for cat in categories %}
+                      <option value="{{ cat }}">{{ cat }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </div>
+
                 <div class="row">
                   <div class="col-6">
                     <label class="small text-muted">Vacaciones (Saldo)</label>
-                    <input type="number" name="vacation_days" class="form-control" value="22">
+                    <input type="number" name="vacation_days" class="form-control" placeholder="Auto">
                   </div>
                   <div class="col-6">
                     <label class="small text-muted">Moscosos (Saldo)</label>
@@ -271,12 +283,13 @@
             <div class="tab-pane fade" id="bulk">
               <form action="/import_workers" method="POST">
                 <div class="alert alert-info small p-2">
-                  Pega aquí tu lista de Excel.<br>
-                  Formato: <b>Nombre, Vacaciones, Moscosos</b>
+                  <b>🧠 Importación Inteligente:</b><br>
+                  Pega listas de Excel, PDF o texto libre.<br>
+                  Detecta: <i>Nombre, Antigüedad (años o fecha), Categoría.</i>
                 </div>
                 <textarea name="csv_data" class="form-control font-monospace" rows="6"
-                  placeholder="Manuel Perez, 5, 1&#10;Antonio Ruiz, 22, 6&#10;Luisa, 10, 0"></textarea>
-                <button type="submit" class="btn btn-dark w-100 mt-3 py-2">Importar Lista</button>
+                  placeholder="Ejemplo Excel copiado:&#10;Manuel Perez    25 años    Peón&#10;Antonio Ruiz    10/05/1990 Oficial&#10;&#10;Ejemplo Texto:&#10;Luisa entró en 2015 limpieza"></textarea>
+                <button type="submit" class="btn btn-dark w-100 mt-3 py-2">Procesar Lista IA</button>
               </form>
             </div>
           </div>

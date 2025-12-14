@@ -255,21 +255,41 @@ def update_worker(id):
 def add_worker():
     name = request.form.get('name')
     category = request.form.get('category')
-    # Saldos iniciales personalizados (o defaults si están vacíos)
+    
+    # Antigüedad
     try:
-        vacs = int(request.form.get('vacation_days', 22))
+        years = int(request.form.get('years_worked', 0))
     except:
-        vacs = 22
+        years = 0
         
+    # Moscosos (por defecto 6)
     try:
         pers = int(request.form.get('personal_days', 6))
     except:
         pers = 6
 
-    new_worker = Worker(name=name, category=category, vacation_days=vacs, personal_days=pers)
+    # Vacaciones: Si viene vacío, calcular AUTO
+    vac_input = request.form.get('vacation_days', '')
+    if vac_input and vac_input.strip():
+        try:
+            vacs = int(vac_input)
+        except:
+            vacs = 22
+    else:
+        # Cálculo automático según antigüedad
+        temp_worker = Worker(years_worked=years)
+        vacs = temp_worker.calculate_vacation_days()
+
+    new_worker = Worker(
+        name=name, 
+        category=category, 
+        years_worked=years,
+        vacation_days=vacs, 
+        personal_days=pers
+    )
     db.session.add(new_worker)
     db.session.commit()
-    flash(f'Trabajador creado: {name}', 'success')
+    flash(f'Trabajador creado: {name} (Antigüedad: {years} años -> {vacs} días vacs.)', 'success')
     return redirect(url_for('index'))
 
 import re  # Importar módulo de expresiones regulares
