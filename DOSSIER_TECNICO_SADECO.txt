@@ -1,0 +1,41 @@
+ESPECIFICACIONES TÉCNICAS Y FUNCIONALES
+SISTEMA DE GESTIÓN DE PERSONAL Y CUADRANTE - "SADECO COMMANDER"
+===================================================================
+
+1. DESCRIPCIÓN GENERAL
+----------------------
+Plataforma digital (Web App Progresiva) diseñada para la optimización de recursos humanos en equipos de campo. Permite la monitorización en tiempo real de saldos de libranza, control de absentismo y cumplimiento del convenio colectivo.
+
+2. MÓDULOS DEL SISTEMA
+----------------------
+
+A. CUADRO DE MANDO INTEGRAL (DASHBOARD)
+   - Visualización ejecutiva del estado de la plantilla (KPIs).
+   - Métricas en tiempo real: Tasa de absentismo (%), Media de vacaciones pendientes y Alertas operativas.
+   - Interfaz "Semáforo": Identificación visual inmediata de estados críticos (Saldos negativos o agotados).
+
+B. GESTIÓN DE TIEMPO Y SALDOS (TIME TRACKING)
+   - Control automatizado de días de Vacaciones (22 laborables) y Asuntos Propios (Moscosos).
+   - Gestión de Bolsa de Horas: Registro de deuda horaria y horas extraordinarias acumuladas.
+   - Auditoría de Cambios: Sistema de Logging que registra qué operación se realizó, cuándo y motivo (Trazabilidad 100%).
+
+C. MÓDULO DE SALUD Y ABSENTISMO (IT)
+   - Registro digital de Incapacidades Temporales (Bajas Médicas).
+   - Contador automático de días de baja desde el inicio de la incidencia.
+   - Indicadores visuales de "No Disponibilidad" (Iconografía de alerta) en el listado general.
+
+D. BASE DE CONOCIMIENTO LEGAL (CONVENIO)
+   - Motor de búsqueda semántica integrado con la normativa vigente.
+   - Consulta instantánea de permisos retribuidos (Matrimonio, fallecimiento, mudanza, etc.).
+   - Prevención de errores en la concesión de días no reglamentarios.
+
+E. MIGRACIÓN Y GESTIÓN DE DATOS
+   - Importación Masiva (Bulk Import): Capacidad de procesar listados CSV/Excel para altas múltiples simultáneas.
+   - Configuración de Saldos Iniciales: Ajuste personalizado para incorporaciones a mitad de ejercicio fiscal.
+
+3. ARQUITECTURA Y SEGURIDAD
+---------------------------
+- Plataforma Cloud: Despliegue en Render Enterprise con arquitectura escalable.
+- Persistencia de Datos: Base de Datos Relacional PostgreSQL (Alta disponibilidad).
+- Accesibilidad Universal: Funciona en cualquier dispositivo (iOS, Android, PC) sin instalación local.
+- Resiliencia: Copias de seguridad automáticas y protección contra pérdida de terminales físicos.
