@@ -272,49 +272,124 @@ def add_worker():
     flash(f'Trabajador creado: {name}', 'success')
     return redirect(url_for('index'))
 
+import re  # Importar módulo de expresiones regulares
+
+# ... imports existentes ...
+
 @app.route('/import_workers', methods=['POST'])
 def import_workers():
-    """Importación masiva desde texto CSV: Nombre,Vacaciones,Moscosos"""
+    """
+    Importación INTELIGENTE masiva.
+    Detecta patrones en texto pegado (Excel, PDF, CSV desordenado).
+    Busca: Nombre, Antigüedad (años o fecha), Categoría.
+    """
     raw_text = request.form.get('csv_data', '')
-    count = 0
     lines = raw_text.strip().split('\n')
+    count = 0
+    
+    # Patrones Inteligentes (Regex)
+    # 1. Detectar años: "15 años", "20 a", "Antigüedad: 10"
+    regex_years = r'(\d+)\s*(?:años|a\.|anys|a)'
+    # 2. Detectar fechas: 12/05/1990, 1990-05-12
+    regex_date = r'(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})'
     
     for line in lines:
+        if not line.strip(): continue
+        
         parts = line.split(',')
-        if len(parts) >= 1:
+        
+        # --- ESTRATEGIA DE EXTRACCIÓN ---
+        name = "Desconocido"
+        years = 0
+        category = "Peón Limpieza Viaria" # Default
+        vacs = 22 # Base
+        pers = 6
+        
+        # A) Intento CSV simple (Nombre, Años/Antigüedad)
+        if len(parts) >= 2 and parts[1].strip().isdigit():
             name = parts[0].strip()
-            if not name: continue
+            years = int(parts[1].strip())
             
-            # Intentar leer saldos si vienen
-            vacs = 22
-            pers = 6
-            if len(parts) > 1 and parts[1].strip().isdigit():
-                vacs = int(parts[1].strip())
-            if len(parts) > 2 and parts[2].strip().isdigit():
-                pers = int(parts[2].strip())
-                
-            # Categoría por defecto en importación masiva
-            new_w = Worker(name=name, category="Peón Limpieza Viaria", vacation_days=vacs, personal_days=pers)
+        # B) Intento Inteligente (Texto libre / Excel pegado)
+        else:
+            # 1. Buscar Nombre (asumimos que es lo primero que no es número ni fecha)
+            # Limpiamos caracteres extraños
+            clean_line = line.replace('\t', ' ').strip()
+            
+            # 2. Buscar Años explícitos
+            match_years = re.search(regex_years, clean_line, re.IGNORECASE)
+            if match_years:
+                years = int(match_years.group(1))
+            
+            # 3. Buscar fechas para calcular antigüedad si no hay años explícitos
+            elif re.search(regex_date, clean_line):
+                match_date = re.search(regex_date, clean_line)
+                date_str = match_date.group(1)
+                try:
+                    # Intentar parsar fecha (asumiendo dd/mm/yyyy)
+                    from datetime import datetime
+                    fmt = "%d/%m/%Y" if '/' in date_str else "%Y-%m-%d"
+                    start_date = datetime.strptime(date_str, fmt)
+                    # Calcular años hasta hoy
+                    today = datetime.now()
+                    years = today.year - start_date.year - ((today.month, today.day) < (start_date.month, start_date.day))
+                except:
+                    years = 0 # Fallback si falla fecha
+            
+            # 4. Inferir nombre (todo lo que está antes de los números)
+            # Esto es heurístico, asumimos que el nombre va al principio
+            name_match = re.search(r'^([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)', clean_line)
+            if name_match:
+                name = name_match.group(1).strip()
+            else:
+                name = parts[0].strip() # Fallback al primer trozo
+            
+            # 5. Detectar Categoría por palabras clave
+            line_lower = clean_line.lower()
+            if "conductor" in line_lower: category = "Conductor Recogida"
+            elif "colegios" in line_lower: category = "Peón Limpiador de Colegios"
+            elif "mantenimiento" in line_lower or "oficial" in line_lower: category = "Oficial de Mantenimiento"
+            elif "administrativo" in line_lower: category = "Administrativo"
+            
+        # --- CÁLCULO DE VACACIONES ---
+        # Usamos un Worker temporal para calcular
+        temp_worker = Worker(years_worked=years)
+        vacs = temp_worker.calculate_vacation_days()
+        
+        # --- GUARDAR EN BD ---
+        if name and len(name) > 3: # Evitar guardar basura
+            new_w = Worker(
+                name=name, 
+                category=category, 
+                years_worked=years,
+                vacation_days=vacs, 
+                personal_days=pers
+            )
             db.session.add(new_w)
             count += 1
             
     db.session.commit()
-    flash(f'Importación masiva completada: {count} trabajadores añadidos', 'success')
+    flash(f'Importación INTELIGENTE completada: {count} trabajadores añadidos.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/init_db')
 def init_db():
-    db.drop_all() # ¡Importante! Borra lo viejo para meter los nuevos campos de Bajas
+    db.drop_all() # ¡Importante! Borra lo viejo para meter los nuevos campos
     db.create_all()
     # Datos de demostración
-    if not Worker.query.first():
-        w1 = Worker(name="Manuel Pérez", category="Peón Limpiador de Colegios")
-        w2 = Worker(name="Antonio Obrero", category="Peón Limpieza Viaria")
-        w3 = Worker(name="Luisa Conductora", category="Conductor Recogida")
-        db.session.add_all([w1, w2, w3])
-        db.session.commit()
-        return "Base de datos REINICIADA con estructura de Bajas."
-    return "La base de datos ya existe."
+    w1 = Worker(name="Manuel Pérez (Veterano)", category="Peón Limpiador de Colegios", years_worked=26) # +3 días
+    w1.vacation_days = w1.calculate_vacation_days() # 25 días
+    
+    w2 = Worker(name="Antonio Obrero (Medio)", category="Peón Limpieza Viaria", years_worked=16) # +1 día
+    w2.vacation_days = w2.calculate_vacation_days() # 23 días
+    
+    w3 = Worker(name="Luisa Conductora (Nueva)", category="Conductor Recogida", years_worked=2) # Base
+    w3.vacation_days = w3.calculate_vacation_days() # 22 días
+    
+    db.session.add_all([w1, w2, w3])
+    db.session.commit()
+    return "Base de datos REINICIADA con estructura de Bajas + Antigüedad + Importación Inteligente."
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=True, host='0.0.0.0', port=port)
