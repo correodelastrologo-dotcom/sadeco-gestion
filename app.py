@@ -24,6 +24,9 @@ class Worker(db.Model):
     name = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(50), nullable=False)  # Peón, Conductor, etc.
     
+    # Antigüedad (para calcular vacaciones según convenio)
+    years_worked = db.Column(db.Integer, default=0)  # Años trabajados en la empresa
+    
     # Saldos Disponibles (Se pueden ajustar individualmente)
     vacation_days = db.Column(db.Integer, default=22) # Días laborables por defecto
     personal_days = db.Column(db.Integer, default=6)  # Asuntos propios (Moscosos)
@@ -36,6 +39,24 @@ class Worker(db.Model):
     
     # Historial de Notas (Para apuntar "pidió el día tal por WhatsApp")
     logs = db.relationship('Log', backref='worker', lazy=True)
+    
+    def calculate_vacation_days(self):
+        """Calcula días de vacaciones según antigüedad (convenio SADECO)"""
+        base_days = 22  # Base para todos
+        
+        # Según convenio colectivo de limpieza:
+        # 15-20 años: +1 día (23 días)
+        # 20-25 años: +2 días (24 días)
+        # 25+ años: +3 días (25 días)
+        
+        if self.years_worked >= 25:
+            return base_days + 3
+        elif self.years_worked >= 20:
+            return base_days + 2
+        elif self.years_worked >= 15:
+            return base_days + 1
+        else:
+            return base_days
 
 class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,6 +92,11 @@ with app.app_context():
                 with db.engine.connect() as conn:
                     conn.execute(text('ALTER TABLE worker ADD COLUMN total_sick_days INTEGER DEFAULT 0'))
                     conn.commit()
+                    
+            if 'years_worked' not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE worker ADD COLUMN years_worked INTEGER DEFAULT 0'))
+                    conn.commit()
     except Exception as e:
         print(f"Error en migración de base de datos: {e}")
         # Continuar de todos modos para que la app arranque
@@ -87,7 +113,7 @@ CATEGORIES = [
 
 # --- CEREBRO DEL CONVENIO (Knowledge Base) ---
 CONVENIO_RULES = {
-    "vacaciones": {"dias": 22, "desc": "22 días laborables por año (o 30 naturales)."},
+    "vacaciones": {"dias": "22 + Antigüedad", "desc": "22 días laborables base. +1 día con 15 años, +2 días con 20 años, +3 días con 25+ años."},
     "asuntos_propios": {"dias": 6, "desc": "6 días de libre disposición (Moscosos). No acumulables a vacaciones."},
     "matrimonio": {"dias": 20, "desc": "20 días naturales por matrimonio o registro pareja de hecho."},
     "nacimiento": {"dias": 3, "desc": "3 días (o 5 si hay desplazamiento fuera de la provincia)."},
