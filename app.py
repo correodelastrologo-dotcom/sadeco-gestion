@@ -192,9 +192,51 @@ def update_worker(id):
 def add_worker():
     name = request.form.get('name')
     category = request.form.get('category')
-    new_worker = Worker(name=name, category=category)
+    # Saldos iniciales personalizados (o defaults si están vacíos)
+    try:
+        vacs = int(request.form.get('vacation_days', 22))
+    except:
+        vacs = 22
+        
+    try:
+        pers = int(request.form.get('personal_days', 6))
+    except:
+        pers = 6
+
+    new_worker = Worker(name=name, category=category, vacation_days=vacs, personal_days=pers)
     db.session.add(new_worker)
     db.session.commit()
+    flash(f'Trabajador creado: {name}', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/import_workers', methods=['POST'])
+def import_workers():
+    """Importación masiva desde texto CSV: Nombre,Vacaciones,Moscosos"""
+    raw_text = request.form.get('csv_data', '')
+    count = 0
+    lines = raw_text.strip().split('\n')
+    
+    for line in lines:
+        parts = line.split(',')
+        if len(parts) >= 1:
+            name = parts[0].strip()
+            if not name: continue
+            
+            # Intentar leer saldos si vienen
+            vacs = 22
+            pers = 6
+            if len(parts) > 1 and parts[1].strip().isdigit():
+                vacs = int(parts[1].strip())
+            if len(parts) > 2 and parts[2].strip().isdigit():
+                pers = int(parts[2].strip())
+                
+            # Categoría por defecto en importación masiva
+            new_w = Worker(name=name, category="Peón Limpieza Viaria", vacation_days=vacs, personal_days=pers)
+            db.session.add(new_w)
+            count += 1
+            
+    db.session.commit()
+    flash(f'Importación masiva completada: {count} trabajadores añadidos', 'success')
     return redirect(url_for('index'))
 
 @app.route('/init_db')

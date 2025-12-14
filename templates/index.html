@@ -220,28 +220,68 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0">
         <div class="modal-header bg-success text-white">
-          <h5 class="modal-title">Alta Nuevo Operario</h5>
+          <h5 class="modal-title">Gestión de Alta</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <form action="/add_worker" method="POST">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="fw-bold">Nombre Completo</label>
-              <input type="text" name="name" class="form-control" placeholder="Ej: Manuel García" required>
+        <div class="modal-body p-0">
+
+          <!-- Pestañas -->
+          <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active fw-bold text-success" id="single-tab" data-bs-toggle="tab"
+                data-bs-target="#single" type="button">Uno a Uno</button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link fw-bold text-secondary" id="bulk-tab" data-bs-toggle="tab" data-bs-target="#bulk"
+                type="button">Carga Masiva</button>
+            </li>
+          </ul>
+
+          <div class="tab-content p-3" id="myTabContent">
+            <!-- ALTA INDIVIDUAL -->
+            <div class="tab-pane fade show active" id="single">
+              <form action="/add_worker" method="POST">
+                <div class="mb-3">
+                  <label class="fw-bold">Nombre Completo</label>
+                  <input type="text" name="name" class="form-control" placeholder="Ej: Manuel García" required>
+                </div>
+                <div class="mb-3">
+                  <label class="fw-bold">Categoría</label>
+                  <select name="category" class="form-select">
+                    {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <label class="small text-muted">Vacaciones (Saldo)</label>
+                    <input type="number" name="vacation_days" class="form-control" value="22">
+                  </div>
+                  <div class="col-6">
+                    <label class="small text-muted">Moscosos (Saldo)</label>
+                    <input type="number" name="personal_days" class="form-control" value="6">
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-success w-100 mt-4 py-2 fw-bold">Guardar</button>
+              </form>
             </div>
-            <div class="mb-3">
-              <label class="fw-bold">Categoría Profesional</label>
-              <select name="category" class="form-select">
-                {% for cat in categories %}
-                <option value="{{ cat }}">{{ cat }}</option>
-                {% endfor %}
-              </select>
+
+            <!-- CARGA MASIVA -->
+            <div class="tab-pane fade" id="bulk">
+              <form action="/import_workers" method="POST">
+                <div class="alert alert-info small p-2">
+                  Pega aquí tu lista de Excel.<br>
+                  Formato: <b>Nombre, Vacaciones, Moscosos</b>
+                </div>
+                <textarea name="csv_data" class="form-control font-monospace" rows="6"
+                  placeholder="Manuel Perez, 5, 1&#10;Antonio Ruiz, 22, 6&#10;Luisa, 10, 0"></textarea>
+                <button type="submit" class="btn btn-dark w-100 mt-3 py-2">Importar Lista</button>
+              </form>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Guardar en Base de Datos</button>
-          </div>
-        </form>
+
+        </div>
       </div>
     </div>
   </div>
