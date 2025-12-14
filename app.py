@@ -20,60 +20,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- CONFIGURACIÓN SIMPLE DE SEGURIDAD ---
-# En un entorno real, esto iría en variables de entorno
-ADMIN_PASSWORD = "sadeco"  # <--- CONTRASEÑA DE ACCESO
-# app.secret_key = 'llave_secreta_sadeco_super_segura' # Ya se usa app.config['SECRET_KEY']
-
-# --- PROTECTOR DE ACCESO (MIDDLEWARE) ---
-@app.before_request
-def require_login():
-    # Rutas permitidas sin contraseña (login, estáticos, etc)
-    allowed_routes = ['login', 'static', 'manifest']
-    if request.endpoint and request.endpoint not in allowed_routes and 'logged_in' not in session:
-        return redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['password'] == ADMIN_PASSWORD:
-            session['logged_in'] = True
-            return redirect(url_for('index'))
-        else:
-            error = "Contraseña incorrecta"
-    
-    return """
-    <html>
-        <head>
-            <title>Acceso Restringido</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-            <style>
-                body { background: #00703C; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
-                .card { max-width: 400px; width: 90%; padding: 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-                .btn-sadeco { background: #FDB913; color: black; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            <div class="card text-center">
-                <h3 class="mb-4">🔐 Capataz SADECO</h3>
-                <p class="text-muted">Área restringida a personal autorizado</p>
-                <form method="post">
-                    <input type="password" name="password" class="form-control form-control-lg mb-3" placeholder="Contraseña de acceso" required autofocus>
-                    <button type="submit" class="btn btn-sadeco btn-lg w-100">Entrar</button>
-                    {% if error %}<p class="text-danger mt-3">{{ error }}</p>{% endif %}
-                </form>
-            </div>
-        </body>
-    </html>
-    """, 200
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('login'))
-
 # --- MODELO DE DATOS ---
 class Worker(db.Model):
     id = db.Column(db.Integer, primary_key=True)
