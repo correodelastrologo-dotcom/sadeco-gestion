@@ -1,108 +1,252 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestión SADECO</title>
-    <!-- Usamos Bootstrap CDN para estilo rápido y limpio -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        .worker-card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 15px; 
-            margin-bottom: 10px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-            cursor: pointer;
-        }
-        .worker-card:active { transform: scale(0.98); background-color: #f0f0f0; }
-        .badge-sadeco { background-color: #008f39; color: white; } /* Verde tipo Sadeco */
-        .status-dot { height: 10px; width: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; margin-right: 5px;}
-        .status-dot.low { background-color: #ffc107; }
-        .status-dot.empty { background-color: #dc3545; }
-        .floating-add {
-            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
-            background-color: #008f39; color: white; border-radius: 50%;
-            text-align: center; line-height: 60px; font-size: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SADECO | Gestión de Personal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --sadeco-green: #00703C;
+      --sadeco-accent: #FDB913;
+    }
+
+    /* Colores aprox corporativos */
+    body {
+      background-color: #f4f6f8;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .navbar {
+      background: linear-gradient(to right, var(--sadeco-green), #005c31);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-size: 1.1rem;
+    }
+
+    /* DASHBOARD WIDGETS */
+    .dash-card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: none;
+      height: 100%;
+    }
+
+    .dash-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--sadeco-green);
+      line-height: 1;
+    }
+
+    .dash-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #6c757d;
+      font-weight: 600;
+    }
+
+    /* WORKER CARDS */
+    .worker-card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px 15px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      border-left: 5px solid transparent;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .worker-card:active {
+      transform: scale(0.98);
+      background: #fafafa;
+    }
+
+    .worker-card.alert-mode {
+      border-left-color: #dc3545;
+      background-color: #fff5f5;
+    }
+
+    .cat-badge {
+      font-size: 0.7rem;
+      background: #e9ecef;
+      color: #495057;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* SEARCH BAR */
+    .search-container {
+      position: relative;
+    }
+
+    .search-input {
+      border-radius: 25px;
+      padding-left: 40px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 12px;
+      color: #adb5bd;
+    }
+
+    /* FAB BUTTON */
+    .floating-add {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 56px;
+      height: 56px;
+      background: var(--sadeco-accent);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 15px rgba(253, 185, 19, 0.4);
+      z-index: 100;
+      border: none;
+      transition: transform 0.2s;
+    }
+
+    .floating-add:active {
+      transform: scale(0.90);
+    }
+  </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-dark bg-success sticky-top">
-  <div class="container-fluid">
-    <span class="navbar-brand mb-0 h1">🚧 Gestión Cuadrante</span>
-  </div>
-</nav>
+  <nav class="navbar navbar-dark sticky-top">
+    <div class="container-fluid d-flex justify-content-between">
+      <span class="navbar-brand">🏗️ SADECO GESTIÓN</span>
+      <a href="/convenio" class="btn btn-sm btn-outline-light rounded-pill px-3">⚖️ Convenio</a>
+    </div>
+  </nav>
 
-<div class="container mt-3">
-    <!-- Buscador -->
-    <form action="/" method="get" class="mb-3">
-        <input type="text" name="search" class="form-control form-control-lg" placeholder="🔍 Buscar trabajador...">
-    </form>
+  <div class="container mt-3 pb-5">
 
-    <!-- Lista de Trabajadores -->
-    <div id="worker-list">
-        {% for worker in workers %}
-        <div class="worker-card" onclick="window.location.href='/worker/{{ worker.id }}'">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-1 fw-bold">{{ worker.name }}</h5>
-                    <small class="text-muted">{{ worker.category }}</small>
-                </div>
-                <div class="text-end">
-                    <!-- Semáforos visuales -->
-                    <span class="badge bg-light text-dark border">Vac: {{ worker.vacation_days }}</span>
-                    <span class="badge bg-light text-dark border">AP: {{ worker.personal_days }}</span>
-                </div>
-            </div>
-            <!-- Barra visual rápida -->
-            <div class="progress mt-2" style="height: 4px;">
-              <div class="progress-bar bg-success" role="progressbar" style="width: {{ (worker.vacation_days / 30) * 100 }}%"></div>
-            </div>
+    <!-- DASHBOARD RESUMEN -->
+    <div class="row g-2 mb-4">
+      <div class="col-4">
+        <div class="dash-card text-center">
+          <div class="dash-val">{{ stats.total }}</div>
+          <div class="dash-label">Plantilla</div>
         </div>
-        {% endfor %}
+      </div>
+      <div class="col-4">
+        <div class="dash-card text-center" style="background: {% if stats.sick > 0 %}#fff5f5{% else %}white{% endif %}">
+          <div class="dash-val text-danger">{{ stats.sick }}</div>
+          <div class="dash-label text-danger">Bajas ({{ stats.sick_rate }}%)</div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="dash-card text-center"
+          style="background: {% if stats.alerts > 0 %}#fff0f0{% else %}white{% endif %}">
+          <div class="dash-val text-danger">{{ stats.alerts }}</div>
+          <div class="dash-label">Alertas</div>
+        </div>
+      </div>
     </div>
 
-</div>
+    <!-- BUSCADOR -->
+    <div class="search-container mb-3">
+      <span class="search-icon">🔍</span>
+      <form action="/" method="get">
+        <input type="text" name="search" class="form-control form-control-lg search-input"
+          placeholder="Buscar operario..." value="{{ request.args.get('search', '') }}">
+      </form>
+    </div>
 
-<!-- Botón Añadir Flotante -->
-<div class="floating-add" data-bs-toggle="modal" data-bs-target="#addModal">+</div>
-
-<!-- Modal Añadir -->
-<div class="modal fade" id="addModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Nuevo Trabajador</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form action="/add_worker" method="POST">
-      <div class="modal-body">
-        <div class="mb-3">
-            <label>Nombre y Apellidos</label>
-            <input type="text" name="name" class="form-control" required>
+    <!-- LISTA TRABAJADORES -->
+    <div id="worker-list">
+      {% for worker in workers %}
+      <!-- Si tiene dias negativos, activamos modo alerta visual -->
+      <a href="/worker/{{ worker.id }}"
+        class="worker-card {% if worker.vacation_days < 0 or worker.personal_days < 0 %}alert-mode{% endif %}">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="m-0 fw-bold text-dark">
+            {{ worker.name }}
+            {% if worker.is_sick %}🚑{% endif %}
+          </h6>
+          <span class="cat-badge">{{ worker.category }}</span>
         </div>
-        <div class="mb-3">
-            <label>Categoría</label>
-            <select name="category" class="form-select">
+
+        <div class="row g-1 text-center">
+          <div class="col-4">
+            <small class="text-muted d-block" style="font-size:0.7rem">VACACIONES</small>
+            <span class="fw-bold {% if worker.vacation_days < 5 %}text-danger{% else %}text-success{% endif %}">
+              {{ worker.vacation_days }}
+            </span>
+          </div>
+          <div class="col-4 border-start border-end">
+            <small class="text-muted d-block" style="font-size:0.7rem">MOSCOSOS</small>
+            <span class="fw-bold {% if worker.personal_days == 0 %}text-warning{% endif %}">
+              {{ worker.personal_days }}
+            </span>
+          </div>
+          <div class="col-4">
+            <small class="text-muted d-block" style="font-size:0.7rem">HORAS</small>
+            <span class="fw-bold text-secondary">{{ worker.extra_hours }}h</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- Botón Añadir -->
+  <button class="floating-add" data-bs-toggle="modal" data-bs-target="#addModal">+</button>
+
+  <!-- Modal Añadir -->
+  <div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">Alta Nuevo Operario</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form action="/add_worker" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="fw-bold">Nombre Completo</label>
+              <input type="text" name="name" class="form-control" placeholder="Ej: Manuel García" required>
+            </div>
+            <div class="mb-3">
+              <label class="fw-bold">Categoría Profesional</label>
+              <select name="category" class="form-select">
                 {% for cat in categories %}
                 <option value="{{ cat }}">{{ cat }}</option>
                 {% endfor %}
-            </select>
-        </div>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success w-100 py-2 fw-bold">Guardar en Base de Datos</button>
+          </div>
+        </form>
       </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success w-100">Guardar</button>
-      </div>
-      </form>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

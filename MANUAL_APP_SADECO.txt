@@ -1,0 +1,47 @@
+DOCUMENTACIÓN TÉCNICA Y GUÍA DE USUARIO
+SISTEMA DE GESTIÓN DE CUADRANTE Y PERSONAL
+===================================================
+
+1. ACCESO A LA PLATAFORMA
+-------------------------
+La herramienta es una Aplicación Web Progresiva (PWA) accesible desde cualquier dispositivo móvil o escritorio con conexión a internet. No requiere descarga desde tiendas de aplicaciones.
+
+» URL de Acceso: [PEGAR AQUÍ LA URL PROPORCIONADA]
+
+INSTRUCCIONES DE INSTALACIÓN (Acceso Directo):
+Para garantizar la operatividad a pantalla completa y acceso rápido:
+
+• En Android (Chrome):
+  Acceda al enlace > Menú Opciones (⋮) > Seleccionar "Instalar aplicación" o "Añadir a pantalla de inicio".
+
+• En iOS (Safari):
+  Acceda al enlace > Botón Compartir (cuadrado con flecha) > Seleccionar "Añadir a pantalla de inicio".
+
+2. FUNCIONALIDADES PRINCIPALES
+------------------------------
+El sistema permite la gestión en tiempo real del saldo de días laborables y horas del personal.
+
+A. Panel de Control (Dashboard)
+   - Visualización general de la plantilla.
+   - Indicadores de estado (Semáforos) para rápida identificación de saldos disponibles.
+   - Barra de búsqueda instantánea por nombre o apellido.
+
+B. Gestión Individual
+   Al seleccionar un operario, se accede a su ficha personal:
+   - VACACIONES: Control de saldo de 22 días laborables (Configurable).
+   - ASUNTOS PROPIOS: Gestión de días de libre disposición.
+   - BOLSA DE HORAS: Registro de horas acumuladas o adeudadas.
+
+   Operativa:
+   Botón [GESTIONAR] > Seleccionar Operación (Consumir/Devolver) > Cantidad > Motivo/Observación.
+   *Todas las operaciones quedan registradas cronológicamente en el historial.*
+
+3. SEGURIDAD Y DATOS
+--------------------
+- Almacenamiento en Nube: Los datos se sincronizan automáticamente con un servidor seguro.
+- Persistencia: La información permanece accesible independientemente del dispositivo utilizado para el acceso.
+- Copias de Seguridad: El sistema cuenta con respaldo de base de datos automatizado.
+
+4. SOPORTE
+----------
+Para incidencias técnicas o restauración de servicio, contacte con el administrador del sistema.
