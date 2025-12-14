@@ -58,9 +58,14 @@ CONVENIO_RULES = {
     "vacaciones": {"dias": 22, "desc": "22 días laborables por año (o 30 naturales)."},
     "asuntos_propios": {"dias": 6, "desc": "6 días de libre disposición (Moscosos). No acumulables a vacaciones."},
     "matrimonio": {"dias": 20, "desc": "20 días naturales por matrimonio o registro pareja de hecho."},
-    "nacimiento": {"dias": 3, "desc": "3 días (o 5 si hay desplazamiento)."},
-    "fallecimiento_1": {"dias": 3, "desc": "Cónyuge o familiares 1º grado (Padres/Hijos). 5 si desplazamiento."},
-    "fallecimiento_2": {"dias": 2, "desc": "Familiares 2º grado (Abuelos/Nietos/Hermanos). 4 si desplazamiento."},
+    "nacimiento": {"dias": 3, "desc": "3 días (o 5 si hay desplazamiento fuera de la provincia)."},
+    
+    "fallecimiento_1_local": {"dias": 3, "desc": "Fallecimiento o Enf. Grave 1º Grado (Padres, Hijos, Cónyuge) en LOCALIDAD."},
+    "fallecimiento_1_fuera": {"dias": 5, "desc": "Fallecimiento o Enf. Grave 1º Grado con DESPLAZAMIENTO."},
+    
+    "fallecimiento_2_local": {"dias": 2, "desc": "Fallecimiento o Enf. Grave 2º Grado (Abuelos, Nietos, Hermanos) en LOCALIDAD."},
+    "fallecimiento_2_fuera": {"dias": 4, "desc": "Fallecimiento o Enf. Grave 2º Grado con DESPLAZAMIENTO."},
+    
     "mudanza": {"dias": 1, "desc": "1 día por traslado de domicilio habitual."},
     "deber_inexcusable": {"dias": "Variable", "desc": "El tiempo indispensable para el cumplimiento (Juicios, Voto, Mesa electoral)."},
     "medico": {"dias": "Variable", "desc": "El tiempo indispensable para consulta médica especialista (Seguridad Social)."}
