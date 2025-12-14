@@ -45,9 +45,36 @@ class Log(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.String(200))
 
-# Crear tablas automáticamante al arrancar (Solo para prototipos simples)
+# Crear tablas y manejar migraciones de esquema
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+        # Intentar agregar columnas faltantes si la tabla ya existe
+        from sqlalchemy import inspect, text
+        inspector = inspect(db.engine)
+        
+        if 'worker' in inspector.get_table_names():
+            columns = [col['name'] for col in inspector.get_columns('worker')]
+            
+            # Agregar columnas faltantes si no existen
+            if 'is_sick' not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE worker ADD COLUMN is_sick BOOLEAN DEFAULT 0'))
+                    conn.commit()
+            
+            if 'sick_start' not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE worker ADD COLUMN sick_start DATETIME'))
+                    conn.commit()
+                    
+            if 'total_sick_days' not in columns:
+                with db.engine.connect() as conn:
+                    conn.execute(text('ALTER TABLE worker ADD COLUMN total_sick_days INTEGER DEFAULT 0'))
+                    conn.commit()
+    except Exception as e:
+        print(f"Error en migración de base de datos: {e}")
+        # Continuar de todos modos para que la app arranque
+
 
 # --- CATEGORIAS ---
 CATEGORIES = [
